@@ -16,7 +16,7 @@ void main() async {
 
   // Abre a caixa para armazenar tarefas
   await Hive.openBox<Todo>('todoBox');
-  await Hive.box('tasks');
+  await Hive.openBox('tasks',);
 
   runApp(const MyApp());
 }

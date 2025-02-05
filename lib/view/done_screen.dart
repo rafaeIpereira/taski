@@ -14,12 +14,12 @@ class DoneScreen extends StatefulWidget {
 }
 
 class _DoneScreenState extends State<DoneScreen> {
-  late Box<Map<dynamic, dynamic>> taskBox;
+  late Box taskBox;
 
   @override
   void initState() {
     super.initState();
-    taskBox = Hive.box('tasks');
+    taskBox = Hive.box('tasks',);
   }
 
   @override
