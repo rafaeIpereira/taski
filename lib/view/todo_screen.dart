@@ -29,12 +29,6 @@ class _TodoScreenState extends State<TodoScreen> {
     tasksBox = Hive.box<Todo>('todoBox');
   }
 
-  // void _addTask(String title, String description) {
-  //   final newTask = Todo(title: title, description: description);
-  //   tasksBox.add(newTask);
-  //   setState(() {});
-  // }
-
   void _deleteTask(int index) {
     tasksBox.deleteAt(index);
     setState(() {});
@@ -43,10 +37,10 @@ class _TodoScreenState extends State<TodoScreen> {
   void _markTaskAsDone(int index) {
     final task = tasksBox.getAt(index);
     task!.isCompleted = true;
+    
     task.save();
     setState(() {});
 
-    // Ir para DoneScreen
     widget.onNavigate(3);
   }
 
