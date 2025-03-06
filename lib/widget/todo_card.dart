@@ -17,7 +17,7 @@ class TodoCard extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onMarkDone,
-    this.isDone = false, // Define se a tarefa está concluída
+    this.isDone = false, 
   });
 
   @override
@@ -45,7 +45,7 @@ class TodoCard extends StatelessWidget {
             leading: GestureDetector(
               onTap: onMarkDone,
               child: SvgPicture.asset(
-                isDone ? 'assets/svg/checked.svg' : 'assets/svg/box.svg',
+                isDone ? 'assets/svg/checked-.svg' : 'assets/svg/box.svg',
                 height: 24,
                 width: 24,
               ),

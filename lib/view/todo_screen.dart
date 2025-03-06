@@ -21,44 +21,67 @@ class TodoScreen extends StatefulWidget {
 }
 
 class _TodoScreenState extends State<TodoScreen> {
-   late Box<Todo> tasksBox;
+   late Box<Todo> todoBox;
 
   @override
   void initState() {
     super.initState();
-    tasksBox = Hive.box<Todo>('todoBox');
+    todoBox = Hive.box<Todo>('todoBox');
   }
 
   void _deleteTask(int index) {
-    tasksBox.deleteAt(index);
+    todoBox.deleteAt(index);
     setState(() {});
   }
 
   void _markTaskAsDone(int index) {
-    final task = tasksBox.getAt(index);
-    task!.isCompleted = true;
-    
-    task.save();
-    setState(() {});
+    final todo = todoBox.getAt(index);
+    if (todo != null) {
+      setState(() {
+        todo.isCompleted = !todo.isCompleted; // Toggle the completion state
+        todo.save();
+      });
 
-    widget.onNavigate(3);
+      // Show a snackbar with appropriate message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(todo.isCompleted
+              ? 'Task marked as complete!'
+              : 'Task marked as incomplete'),
+          duration: Duration(seconds: 2),
+          action: SnackBarAction(
+            label: todo.isCompleted ? 'View Completed' : 'View Tasks',
+            onPressed: () {
+              widget.onNavigate(
+                  todo.isCompleted ? 3 : 0); // Navigate to appropriate screen
+            },
+          ),
+        ),
+      );
+    }
+    // final todo = todoBox.getAt(index);
+    // setState(() {
+    // todo!.isCompleted = true;
+    // todo.save();
+    // });
+    // widget.onNavigate(3);
   }
 
   void _editTask(int index) {
-   final task = tasksBox.getAt(index);
-    if (task != null) {
+   final todo = todoBox.getAt(index);
+    if (todo != null) {
       showModalBottomSheet(
         backgroundColor: Colors.white,
         context: context,
         isScrollControlled: true,
         builder: (BuildContext context) {
           return EditTaskModal(
-            initialTitle: task.title,
-            initialDescription: task.description,
+            initialTitle: todo.title,
+            initialDescription: todo.description,
             onSave: (newTitle, newDescription) {
-              task.title = newTitle;
-              task.description = newDescription;
-              task.save();
+              todo.title = newTitle;
+              todo.description = newDescription;
+              todo.save();
             },
           );
         },
@@ -149,12 +172,14 @@ class _TodoScreenState extends State<TodoScreen> {
           Padding(
             padding: const EdgeInsets.only(left: 20),
             child: ValueListenableBuilder(
-              valueListenable: tasksBox.listenable(),
+              valueListenable: todoBox.listenable(),
               builder: (context, Box<Todo> box, _) {
+                final incompleteTasks =
+                    box.values.where((todo) => !todo.isCompleted).length;
                 return Text(
                   box.isEmpty
                       ? 'Create tasks to achieve more.'
-                      : "You’ve got ${box.length} tasks to do.",
+                      : "You’ve got $incompleteTasks tasks remaining.",
                   style: GoogleFonts.urbanist(
                     fontSize: 18,
                     color: TodoScreen.color2,
@@ -166,22 +191,31 @@ class _TodoScreenState extends State<TodoScreen> {
           ),
          Expanded(
             child: ValueListenableBuilder(
-              valueListenable: tasksBox.listenable(),
+              valueListenable: todoBox.listenable(),
               builder: (context, Box<Todo> box, _) {
-                if (box.isEmpty) {
+                final tasks = box.values.toList();
+
+                if (tasks.isEmpty) {
                   return const Center(child: Text("No tasks yet"));
                 }
                 return ListView.builder(
-                  itemCount: box.length,
+                  itemCount: tasks.length,
                   itemBuilder: (context, index) {
-                    final task = box.getAt(index)!;
-                    return TodoCard(
-                      title: task.title,
-                      description: task.description,
-                      onDelete: () => _deleteTask(index),
-                      onEdit: () => _editTask(index),
-                      onMarkDone: () => _markTaskAsDone(index),
-                    );
+                    final todo = tasks[index];
+                    if (!todo.isCompleted) {
+                      // Only show incomplete tasks
+                      return TodoCard(
+                        title: todo.title,
+                        description: todo.description,
+                        onDelete: () async {
+                          await box.delete(todo.key);
+                        },
+                        onEdit: () => _editTask(todo.key),
+                        onMarkDone: () => _markTaskAsDone(index),
+                        isDone: todo.isCompleted,
+                      );
+                    }
+                    return SizedBox.shrink();
                   },
                 );
               },

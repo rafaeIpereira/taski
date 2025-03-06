@@ -5,18 +5,13 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:taski/model/todo.dart';
 import 'package:taski/view/home_screen.dart';
 
-// import 'package:taski/todo_list_screen.dart';
 
 void main() async {
-  // Inicializa o Hive
   await Hive.initFlutter();
 
-  // Registra adaptadores (vamos criar um adaptador para a classe Todo mais tarde)
   Hive.registerAdapter(TodoAdapter());
 
-  // Abre a caixa para armazenar tarefas
   await Hive.openBox<Todo>('todoBox');
-  await Hive.openBox('tasks',);
 
   runApp(const MyApp());
 }
